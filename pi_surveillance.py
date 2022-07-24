@@ -124,7 +124,7 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
                     # upload the image to Dropbox and cleanup the tempory image
                     print("[UPLOAD] {}".format(ts))
                     #copy(t.path,"/home/sean/images/")
-                    os.system('cp "%s" "%s"' % (t.path, '/mnt/storage/Cloud/security_images'))
+                    os.system('cp "%s" "%s"' % (t.path, conf["image_copy_to_location"]))
                     t.cleanup()
 
                     # update the last uploaded timestamp and reset the motion

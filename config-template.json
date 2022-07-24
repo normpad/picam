@@ -12,5 +12,6 @@
 	"min_area": 5000,
     "mqtt_broker": "BROKER_IP",
     "mqtt_username": "picam",
-    "mqtt_password":  "PASSWORD"
+    "mqtt_password":  "PASSWORD",
+    "image_copy_to_location": "LOCATION"
 }
