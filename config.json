@@ -1,0 +1,16 @@
+{
+	"show_video": false,
+	"use_dropbox": false,
+	"dropbox_access_token": "YOUR_DROPBOX_KEY",
+	"dropbox_base_path": "YOUR_DROPBOX_PATH",
+	"min_upload_seconds": 0,
+	"min_motion_frames": 6,
+	"camera_warmup_time": 10,
+	"delta_thresh": 5,
+	"resolution": [640, 480],
+	"fps": 16,
+	"min_area": 5000,
+    "mqtt_broker": "BROKER_IP",
+    "mqtt_username": "picam",
+    "mqtt_password":  "PASSWORD"
+}
