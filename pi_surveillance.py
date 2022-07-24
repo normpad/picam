@@ -30,6 +30,8 @@ mqtt_client = mqtt.Client(conf["mqtt_username"])
 mqtt_client.username_pw_set(conf["mqtt_username"], conf["mqtt_password"])
 mqtt_client.connect(conf["mqtt_broker"])
 mqtt_timeout = datetime.datetime.now()
+mqtt_client.publish("homeassistant/binary_sensor/picam/config", '{"name": "picam", "unique_id": "picam", "device_class": "motion", "state_topic": "homeassistant/binary_sensor/picam/state"}', retain=True)
+mqtt_last_state = ""
  
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -56,9 +58,9 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
     timestamp = datetime.datetime.now()
     text = "Unoccupied"
 
-    if (timestamp - mqtt_timeout).seconds > 60:
-        mqtt_client.publish("picam", "Picam alive")
+    if (timestamp - mqtt_timeout).seconds > 30:
         mqtt_timeout = timestamp
+        mqtt_client.publish("homeassistant/binary_sensor/picam/heatbeat", '')
                         
     # resize the frame, convert it to grayscale, and blur it
     #frame = imutils.resize(frame, width=500)
@@ -86,12 +88,17 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
     cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
+
+    if len(cnts) == 0 and mqtt_last_state != "OFF":
+        mqtt_client.publish("homeassistant/binary_sensor/picam/state", "OFF", retain=True)
+        mqtt_last_state = "OFF"
                     
     # loop over the contours
     for c in cnts:
         # if the contour is too small, ignore it
         if cv2.contourArea(c) < conf["min_area"]:
             continue
+
                                                             
         # compute the bounding box for the contour, draw it on the frame,
         # and update the text
@@ -131,11 +138,16 @@ for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True
                     # counter
                     lastUploaded = timestamp
 
-                    mqtt_client.publish("picam", "Motion detected")
+            if mqtt_last_state != "ON":
+                mqtt_client.publish("homeassistant/binary_sensor/picam/state", "ON", retain=True)
+                mqtt_last_state = "ON"
 
         #otherwise, the room is not occupied
         else:
             motionCounter = 0
+            if mqtt_last_state != "OFF":
+                mqtt_client.publish("homeassistant/binary_sensor/picam/state", "OFF", retain=True)
+                mqtt_last_state = "OFF"
 
 
     # check to see if the frames should be displayed to screen
